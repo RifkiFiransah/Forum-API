@@ -38,3 +38,22 @@ describe('HTTP server', () => {
     expect(responseJson.message).toEqual('terjadi kegagalan pada server kami');
   });
 });
+
+describe('when GET /', () => {
+  it('should return 200 and welcome to forum api test connection successfully', async () => {
+    // Arrange
+    const server = await createServer({});
+
+    // Action
+    const response = await server.inject({
+      method: 'GET',
+      url: '/',
+    });
+
+    // Assert
+    const responseJson = JSON.parse(response);
+    expect(response.statusCode).toEqual(200);
+    expect(responseJson.status).toEqual('success');
+    expect(responseJson.value).toEqual('welcome to forum api test connection successfully');
+  });
+});
