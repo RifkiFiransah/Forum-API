@@ -51,7 +51,7 @@ describe('when GET /', () => {
     });
 
     // Assert
-    const responseJson = JSON.parse(response);
+    const responseJson = JSON.parse(response.payload);
     expect(response.statusCode).toEqual(200);
     expect(responseJson.status).toEqual('success');
     expect(responseJson.value).toEqual('welcome to forum api test connection successfully');
