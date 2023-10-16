@@ -65,7 +65,7 @@ const createServer = async (container) => {
     path: '/',
     handler: () => ({
       status: 'success',
-      value: 'welcome to forum api test connection successfully',
+      value: 'welcome to forum api connection successfully',
     }),
   });
 
