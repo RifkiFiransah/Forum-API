@@ -20,7 +20,7 @@ describe('/likes endpoint', () => {
   });
 
   describe('when POST /threads/{threadId}/comments/{commentId}/likes', () => {
-    it('should response 201 and persisted like', async () => {
+    it('should response 200 and persisted like', async () => {
       // Arrange
       const server = await createServer(container);
       const { accessToken } = await TokenServerTestHelper.getAccessTokenandUserId({ server });
