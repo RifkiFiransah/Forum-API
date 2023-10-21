@@ -1,5 +1,6 @@
 const AddThreadUseCase = require('../../../../Applications/use_case/AddThreadUseCase');
 const GetThreadUseCase = require('../../../../Applications/use_case/GetThreadUseCase');
+const LikeUnlikeUseCase = require('../../../../Applications/use_case/LikeUnlikeUseCase');
 
 class ThreadsHandler {
   constructor(container) {
@@ -7,6 +8,7 @@ class ThreadsHandler {
 
     this.postThreadHandler = this.postThreadHandler.bind(this);
     this.getThreadByIdHandler = this.getThreadByIdHandler.bind(this);
+    this.putLikeUnlikeHandler = this.putLikeUnlikeHandler.bind(this);
   }
 
   async postThreadHandler(request, h) {
@@ -39,6 +41,23 @@ class ThreadsHandler {
         thread: getThread,
       },
     };
+  }
+
+  async putLikeUnlikeHandler(request, h) {
+    const { threadId, commentId } = request.params;
+    const { id } = request.auth.credentials;
+    const likeUnlikeUseCase = this._container.getInstance(LikeUnlikeUseCase.name);
+    const useCasePayload = {
+      threadId,
+      commentId,
+      userId: id,
+    };
+    await likeUnlikeUseCase.execute(useCasePayload);
+    const response = h.response({
+      status: 'success',
+    });
+    response.code(200);
+    return response;
   }
 }
 

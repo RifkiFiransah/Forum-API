@@ -2,9 +2,10 @@
 /* eslint-disable max-len */
 /* eslint-disable no-undef */
 
-const GetThreadUseCase = require('../GetThreadUseCase');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
+const LikeRepository = require('../../../Domains/likes/LikeRepository');
+const GetThreadUseCase = require('../GetThreadUseCase');
 
 describe('GetThreadUseCase', () => {
   it('should orchestrating the detail thread action correctly', async () => {
@@ -24,6 +25,7 @@ describe('GetThreadUseCase', () => {
       username: 'rifki',
       date: '2023',
       content: 'This is content',
+      likeCount: 1,
       is_deleted: false,
     }];
 
@@ -51,13 +53,19 @@ describe('GetThreadUseCase', () => {
     /** Creating dependency of use case */
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
+    const mockLikeRepository = new LikeRepository();
 
     /** Mocking needed function */
     mockThreadRepository.getThreadById = jest.fn().mockImplementation(() => Promise.resolve(expectedThread));
     mockCommentRepository.getCommentByThreadId = jest.fn().mockImplementation(() => Promise.resolve(expectedComment));
     mockThreadRepository.getRepliesByThreadId = jest.fn().mockImplementation(() => Promise.resolve(expectedReplies));
+    mockLikeRepository.getLikeCountComment = jest.fn(() => Promise.resolve(1));
 
-    const mockGetThreadUseCase = new GetThreadUseCase({ threadRepository: mockThreadRepository, commentRepository: mockCommentRepository });
+    const mockGetThreadUseCase = new GetThreadUseCase({
+      likeRepository: mockLikeRepository,
+      threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
+    });
 
     // Action
     const getThread = await mockGetThreadUseCase.execute(threadId);
@@ -67,6 +75,7 @@ describe('GetThreadUseCase', () => {
       ...expectedThread,
       comments: expectedCommentAndReplies,
     });
+    expect(mockLikeRepository.getLikeCountComment).toBeCalledWith('comment-123');
     expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
     expect(mockCommentRepository.getCommentByThreadId).toBeCalledWith(threadId);
     expect(mockThreadRepository.getRepliesByThreadId).toBeCalledWith(threadId);
@@ -92,6 +101,7 @@ describe('GetThreadUseCase', () => {
         username: 'user-123',
         date: '2023',
         content: '**komentar telah dihapus**',
+        likeCount: 1,
         is_deleted: true,
       },
     ];
@@ -120,15 +130,18 @@ describe('GetThreadUseCase', () => {
     // creating dependency of use case
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
+    const mockLikeRepository = new LikeRepository();
 
     // mocking needed function
     mockThreadRepository.getThreadById = jest.fn().mockImplementation(() => Promise.resolve(expectThread));
     mockCommentRepository.getCommentByThreadId = jest.fn().mockImplementation(() => Promise.resolve(expectComments));
     mockThreadRepository.getRepliesByThreadId = jest.fn().mockImplementation(() => Promise.resolve(expectReplies));
+    mockLikeRepository.getLikeCountComment = jest.fn(() => Promise.resolve(1));
 
     const mockGetThreadUseCase = new GetThreadUseCase({
       commentRepository: mockCommentRepository,
       threadRepository: mockThreadRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -142,6 +155,7 @@ describe('GetThreadUseCase', () => {
     expect(mockThreadRepository.getThreadById).toBeCalledWith(getThreadUseCasePayload.threadId);
     expect(mockCommentRepository.getCommentByThreadId).toBeCalledWith(getThreadUseCasePayload.threadId);
     expect(mockThreadRepository.getRepliesByThreadId).toBeCalledWith(getThreadUseCasePayload.threadId);
+    expect(mockLikeRepository.getLikeCountComment).toBeCalledWith('comment-123');
   });
 
   it('should throw error if use case payload not contain threadId', async () => {

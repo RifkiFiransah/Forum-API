@@ -1,7 +1,8 @@
 class GetThreadUseCase {
-  constructor({ threadRepository, commentRepository }) {
+  constructor({ likeRepository, threadRepository, commentRepository }) {
     this._threadRepository = threadRepository;
     this._commentRepository = commentRepository;
+    this._likeRepository = likeRepository;
   }
 
   async execute(threadId) {
@@ -10,18 +11,19 @@ class GetThreadUseCase {
     const getComment = await this._commentRepository.getCommentByThreadId(threadId);
     const getReply = await this._threadRepository.getRepliesByThreadId(threadId);
 
-    const comments = getComment.map((comment) => ({
+    const comments = await Promise.all(getComment.map(async (comment) => ({
       id: comment.id,
       username: comment.username,
       date: comment.date,
       content: comment.is_deleted ? '**komentar telah dihapus**' : comment.content,
+      likeCount: await this._likeRepository.getLikeCountComment(comment.id),
       replies: getReply.filter((reply) => reply.comment_id === comment.id).map((reply) => ({
         id: reply.id,
         content: reply.is_deleted ? '**balasan telah dihapus**' : reply.content,
         date: reply.date,
         username: reply.username,
       })),
-    }));
+    })));
 
     return { ...getThread, comments };
   }
